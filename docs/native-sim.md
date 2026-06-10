@@ -66,12 +66,24 @@ Expected output:
 ...
 ```
 
-### 2. Run the Mojo test
+### 2. Run a Mojo example
 
 ```bash
 cd /home/zmm/projects/zephyr-mojo
+
+# Run the native_sim-specific test
 mojo run -I . native_sim/test_native_sim.mojo
+
+# Or run any of the examples (they use the ctypes backend by default)
+mojo run -I . examples/dining_philosophers.mojo
+mojo run -I . examples/producer_consumer.mojo
+mojo run -I . examples/channel_demo.mojo
 ```
+
+On the host without Zephyr linked, examples will hit "undefined symbol" errors
+at runtime — this is expected. The code compiles successfully and demonstrates
+the full API. With a Zephyr native_sim .so loaded, the symbols resolve
+and the examples run against a real Zephyr kernel.
 
 Expected output:
 ```
