@@ -1,6 +1,5 @@
 # ─── Channel (MPSC) ───────────────────────────────────────────────────
-# A multi-producer, single-consumer channel built on Zephyr's k_queue.
-# Inspired by the Rust zephyr::sync::channel module.
+# Multi-producer, single-consumer channel on Zephyr's k_queue.
 
 from zephyr_sys import (
     k_queue_init, k_queue_alloc_append, k_queue_alloc_prepend,
@@ -18,15 +17,21 @@ struct ChannelSender(Movable, ImplicitlyCopyable):
 
     def send(self, value: Int) raises Error:
         """Send a value through the channel. Never blocks."""
-        var result = k_queue_alloc_append(self._queue_addr, value)
-        if result < 0:
-            raise Error(UInt32(-result))
+        try:
+            var result = k_queue_alloc_append(self._queue_addr, value)
+            if result < 0:
+                raise Error(UInt32(-result))
+        except:
+            raise Error(UInt32(12))  # ENOMEM
 
     def send_prepend(self, value: Int) raises Error:
-        """Send a value to the front of the channel (high priority)."""
-        var result = k_queue_alloc_prepend(self._queue_addr, value)
-        if result < 0:
-            raise Error(UInt32(-result))
+        """Send a value to the front (high priority)."""
+        try:
+            var result = k_queue_alloc_prepend(self._queue_addr, value)
+            if result < 0:
+                raise Error(UInt32(-result))
+        except:
+            raise Error(UInt32(12))
 
 
 @fieldwise_init
@@ -37,10 +42,13 @@ struct ChannelReceiver(Movable, ImplicitlyCopyable):
     def recv[T: TimeoutConvertible](self, timeout: T) raises Error -> Int:
         """Receive a value with a timeout."""
         var t = timeout.to_k_timeout()
-        var result = k_queue_get(self._queue_addr, t)
-        if result == 0:
-            raise Error(UInt32(110))  # ETIMEDOUT
-        return result
+        try:
+            var result = k_queue_get(self._queue_addr, t)
+            if result == 0:
+                raise Error(UInt32(110))  # ETIMEDOUT
+            return result
+        except:
+            raise Error(UInt32(110))
 
     def try_recv(self) raises Error -> Int:
         """Try to receive without blocking."""
@@ -50,30 +58,21 @@ struct ChannelReceiver(Movable, ImplicitlyCopyable):
         """Block until a value arrives."""
         return self.recv(Forever())
 
-    def is_empty(self) -> Bool:
+    def is_empty(self) raises -> Bool:
         """Check if the channel has pending messages."""
         return k_queue_is_empty(self._queue_addr) != 0
 
-    def peek(self) -> Int:
-        """Peek at the next value without removing it. Returns 0 if empty."""
+    def peek(self) raises -> Int:
+        """Peek at the next value. Returns 0 if empty."""
         return k_queue_peek_head(self._queue_addr)
 
     def cancel_wait(self) raises:
-        """Cancel all pending receive operations on this channel."""
+        """Cancel pending receives."""
         k_queue_cancel_wait(self._queue_addr)
 
 
 def channel() raises -> Tuple[ChannelSender, ChannelReceiver]:
-    """Create a new unbounded MPSC channel.
-
-    Returns a (Sender, Receiver) pair backed by a Zephyr k_queue.
-    The channel dynamically allocates elements and never blocks on send.
-
-    Example:
-        var tx, rx = channel()
-        tx.send(42)
-        var val = rx.recv_forever()  # returns 42
-    """
+    """Create a new unbounded MPSC channel."""
     from std.python import Python
     var ctypes = Python.import_module("ctypes")
     var size: Int = 32
@@ -81,7 +80,4 @@ def channel() raises -> Tuple[ChannelSender, ChannelReceiver]:
     var py_addr = ctypes.addressof(buf)
     var addr = Int(py=py_addr)
     k_queue_init(addr)
-
-    var tx = ChannelSender(_queue_addr=addr)
-    var rx = ChannelReceiver(_queue_addr=addr)
-    return (tx, rx)
+    return (ChannelSender(_queue_addr=addr), ChannelReceiver(_queue_addr=addr))

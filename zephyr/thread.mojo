@@ -16,23 +16,19 @@ from zephyr.object import ZephyrObject, K_THREAD_SIZE
 # ─── ThreadStack ───────────────────────────────────────────────────────
 
 
-struct ThreadStack:
+@fieldwise_init
+struct ThreadStack(Movable):
     """Represents a Zephyr thread stack allocation.
 
-    Stacks must be properly aligned (Z_KERNEL_STACK_OBJ_ALIGN).
-    For host testing, stacks are allocated via ctypes.
-    On real Zephyr, stacks are statically allocated in .noinit sections.
+    Create with ThreadStack.create(size_in_bytes).
     """
     var _obj: ZephyrObject
     var _size: Int
 
-    def __init__(out self, size: Int):
-        """Allocate a stack of the given size in bytes.
-
-        For real Zephyr, typical sizes: 1024, 2048, 4096.
-        """
-        self._obj = ZephyrObject(size)
-        self._size = size
+    @staticmethod
+    def create(size: Int) raises -> Self:
+        """Allocate a stack of the given size in bytes."""
+        return Self(_obj=ZephyrObject.create(size), _size=size)
 
     def base(self) -> Int:
         """Get the base pointer for k_thread_create."""
@@ -140,14 +136,13 @@ struct Thread:
 
 
 struct ThreadBuilder:
-    """Builder for creating Zephyr threads with fluent API.
+    """Builder for creating Zephyr threads.
 
     Example:
-        var stack = ThreadStack(2048)
-        var thread = ThreadBuilder()
-            .set_priority(THREAD_PRIORITY_NORMAL)
-            .set_name("my_thread")
-            .spawn(stack, entry_fn_ptr)
+        var builder = ThreadBuilder()
+        builder.set_priority(THREAD_PRIORITY_NORMAL)
+        builder.set_name("my_thread")
+        var thread = builder.spawn(stack, entry_fn_ptr)
     """
     var _priority: Int
     var _options: UInt32
@@ -160,25 +155,21 @@ struct ThreadBuilder:
         self._name = ""
         self._delay = K_NO_WAIT
 
-    def set_priority(mut self, prio: Int) -> Self:
+    def set_priority(mut self, prio: Int):
         """Set the thread's priority (lower = higher priority)."""
         self._priority = prio
-        return self
 
-    def set_name(mut self, name: String) -> Self:
+    def set_name(mut self, name: String):
         """Set a name for the thread."""
         self._name = name
-        return self
 
-    def set_options(mut self, options: UInt32) -> Self:
+    def set_options(mut self, options: UInt32):
         """Set thread creation options."""
         self._options = options
-        return self
 
-    def set_delay_start(mut self) -> Self:
+    def set_delay_start(mut self):
         """Start the thread paused. Call thread.resume() to start."""
         self._delay = K_FOREVER
-        return self
 
     def spawn(self, stack: Int, stack_size: Int, entry: Int) raises -> Thread:
         """Create and start the thread immediately.
@@ -191,7 +182,7 @@ struct ThreadBuilder:
         Returns:
             A Thread handle.
         """
-        var thread_obj = ZephyrObject(K_THREAD_SIZE)
+        var thread_obj = ZephyrObject.create(K_THREAD_SIZE)
         var thread_addr = thread_obj.addr()
 
         var tid = k_thread_create(
