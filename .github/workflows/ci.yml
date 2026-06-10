@@ -40,6 +40,11 @@ jobs:
             .venv/bin/mojo run -I . "$ex" 2>&1 | head -4 || true
           done
 
+      - name: Validate native backend output
+        run: |
+          python3 -m codegen.gen_sys --backend native
+          python3 scripts/validate_native.py
+
   native_sim:
     runs-on: ubuntu-latest
     needs: compile
