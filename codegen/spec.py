@@ -824,6 +824,178 @@ FUNCTIONS = [
         description="Unlock interrupts with the given key.",
         category="irq",
     ),
+    # ── Events ──────────────────────────────────────────────────────
+    Function(
+        name="k_event_init",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[Param("event", "struct k_event *", "Pointer", is_pointer=True)],
+        returns_error=False,
+        description="Initialize an event object.",
+        category="event",
+    ),
+    Function(
+        name="k_event_post",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[
+            Param("event", "struct k_event *", "Pointer", is_pointer=True),
+            Param("events", "uint32_t", "UInt32"),
+        ],
+        returns_error=False,
+        description="Post events to an event object.",
+        category="event",
+    ),
+    Function(
+        name="k_event_wait",
+        return_type="uint32_t",
+        mojo_return="UInt32",
+        params=[
+            Param("event", "struct k_event *", "Pointer", is_pointer=True),
+            Param("events", "uint32_t", "UInt32"),
+            Param("reset", "int", "Int"),
+            Param("timeout", "k_timeout_t", "Int64"),
+        ],
+        returns_error=False,
+        description="Wait for events on an event object.",
+        category="event",
+    ),
+
+    # ── Spinlock ────────────────────────────────────────────────────
+    Function(
+        name="k_spin_lock",
+        return_type="k_spinlock_key_t",
+        mojo_return="UInt32",
+        params=[Param("lock", "struct k_spinlock *", "Pointer", is_pointer=True)],
+        returns_error=False,
+        description="Lock a spinlock, returning the interrupt key.",
+        category="spinlock",
+    ),
+    Function(
+        name="k_spin_unlock",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[
+            Param("lock", "struct k_spinlock *", "Pointer", is_pointer=True),
+            Param("key", "k_spinlock_key_t", "UInt32"),
+        ],
+        returns_error=False,
+        description="Unlock a spinlock, restoring interrupts.",
+        category="spinlock",
+    ),
+
+    # ── Memory Slab ─────────────────────────────────────────────────
+    Function(
+        name="k_mem_slab_init",
+        return_type="int",
+        mojo_return="Int",
+        params=[
+            Param("slab", "struct k_mem_slab *", "Pointer", is_pointer=True),
+            Param("buffer", "void *", "Pointer", is_pointer=True),
+            Param("block_size", "size_t", "Int"),
+            Param("num_blocks", "uint32_t", "UInt32"),
+        ],
+        returns_error=True,
+        description="Initialize a memory slab.",
+        category="mem_slab",
+    ),
+    Function(
+        name="k_mem_slab_alloc",
+        return_type="int",
+        mojo_return="Int",
+        params=[
+            Param("slab", "struct k_mem_slab *", "Pointer", is_pointer=True),
+            Param("mem", "void **", "Pointer", is_pointer=True),
+            Param("timeout", "k_timeout_t", "Int64"),
+        ],
+        returns_error=True,
+        description="Allocate a block from a memory slab.",
+        category="mem_slab",
+    ),
+    Function(
+        name="k_mem_slab_free",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[
+            Param("slab", "struct k_mem_slab *", "Pointer", is_pointer=True),
+            Param("mem", "void **", "Pointer", is_pointer=True),
+        ],
+        returns_error=False,
+        description="Free a block back to a memory slab.",
+        category="mem_slab",
+    ),
+
+    # ── Pipe ────────────────────────────────────────────────────────
+    Function(
+        name="k_pipe_init",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[
+            Param("pipe", "struct k_pipe *", "Pointer", is_pointer=True),
+            Param("buffer", "unsigned char *", "Pointer", is_pointer=True),
+            Param("size", "size_t", "Int"),
+        ],
+        returns_error=False,
+        description="Initialize a pipe.",
+        category="pipe",
+    ),
+    Function(
+        name="k_pipe_put",
+        return_type="int",
+        mojo_return="Int",
+        params=[
+            Param("pipe", "struct k_pipe *", "Pointer", is_pointer=True),
+            Param("data", "void *", "Pointer", is_pointer=True),
+            Param("bytes_to_write", "size_t", "Int"),
+            Param("bytes_written", "size_t *", "Pointer", is_pointer=True),
+            Param("min_xfer", "size_t", "Int"),
+            Param("timeout", "k_timeout_t", "Int64"),
+        ],
+        returns_error=True,
+        description="Write data to a pipe.",
+        category="pipe",
+    ),
+    Function(
+        name="k_pipe_get",
+        return_type="int",
+        mojo_return="Int",
+        params=[
+            Param("pipe", "struct k_pipe *", "Pointer", is_pointer=True),
+            Param("data", "void *", "Pointer", is_pointer=True),
+            Param("bytes_to_read", "size_t", "Int"),
+            Param("bytes_read", "size_t *", "Pointer", is_pointer=True),
+            Param("min_xfer", "size_t", "Int"),
+            Param("timeout", "k_timeout_t", "Int64"),
+        ],
+        returns_error=True,
+        description="Read data from a pipe.",
+        category="pipe",
+    ),
+
+    # ── Delayable Work ──────────────────────────────────────────────
+    Function(
+        name="k_work_delayable_init",
+        return_type="void",
+        mojo_return="NoneType",
+        params=[Param("work", "struct k_work_delayable *", "Pointer", is_pointer=True)],
+        returns_error=False,
+        description="Initialize a delayable work item.",
+        category="work",
+    ),
+    Function(
+        name="k_work_schedule",
+        return_type="int",
+        mojo_return="Int",
+        params=[
+            Param("work", "struct k_work_delayable *", "Pointer", is_pointer=True),
+            Param("delay", "k_timeout_t", "Int64"),
+        ],
+        returns_error=True,
+        description="Schedule a delayable work item.",
+        category="work",
+    ),
+
+
 ]
 
 # Zephyr error codes (negated POSIX errnos as positive u32 values)

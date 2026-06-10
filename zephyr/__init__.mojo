@@ -16,3 +16,5 @@ from zephyr.channel import ChannelSender, ChannelReceiver, channel
 from zephyr.work import Signal, Work, SubmitResult
 from zephyr.logging import Logger, printk, panic, LOG_LEVEL_DBG
 from zephyr.object import ZephyrObject, Fixed
+from zephyr.gpio import GPIOPin, gpio_output_low, gpio_input
+from zephyr.static import StaticSemaphore, StaticMutex
