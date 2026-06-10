@@ -76,3 +76,8 @@ The Rust bindings at `zephyr-lang-rust` serve as the architectural model:
 - `zephyr-sys/` → `zephyr_sys/` (raw FFI)
 - `zephyr/src/sys/` → `zephyr/` (safe wrappers)
 - `zephyr/src/sync/` → `zephyr/sync/` (idiomatic API)
+
+## Documentation
+
+- [API Reference](docs/api-reference.md) — Complete API docs with examples
+- [native_sim Integration](docs/native-sim.md) — Run Mojo on Zephyr without hardware
