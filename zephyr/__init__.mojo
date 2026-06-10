@@ -23,3 +23,5 @@ from zephyr.mutex import Mutex as SysMutex
 from zephyr.condvar import Condvar as SysCondvar
 from zephyr.timer import Timer
 from zephyr.queue import Queue
+from zephyr.thread import Thread, ThreadStack
+from zephyr.channel import ChannelSender, ChannelReceiver, channel

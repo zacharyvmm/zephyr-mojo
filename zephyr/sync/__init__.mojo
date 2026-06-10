@@ -11,6 +11,7 @@ from zephyr.mutex import Mutex as SysMutex
 from zephyr.condvar import Condvar as SysCondvar
 from zephyr.error import Error
 from zephyr.semaphore import TimeoutConvertible, Forever, NoWait
+from zephyr.sync.spinmutex import SpinMutex, SpinMutexGuard
 
 
 # ─── MutexGuard ────────────────────────────────────────────────────────

@@ -1,18 +1,22 @@
-# Quick import test
-from zephyr import Semaphore, Error
-from zephyr.sync import Mutex
-from zephyr.time import Duration, Timeout, sleep
+# Quick import test — verifies all modules compile
+from zephyr import (
+    Semaphore, Error, Forever, NoWait,
+    Timer, Queue, Thread, ThreadStack,
+    ChannelSender, ChannelReceiver, channel,
+)
+from zephyr.sync import Mutex, Condvar, SpinMutex
+from zephyr.time import Duration, Timeout, Instant, sleep
 from zephyr.mutex import Mutex as SysMutex
-from zephyr.condvar import Condvar
-from zephyr.timer import Timer
-from zephyr.queue import Queue
+from zephyr.condvar import Condvar as SysCondvar
 
 def main() raises:
     print("All modules import successfully!")
-    print("  zephyr.Semaphore — OK")
-    print("  zephyr.sync.Mutex[T] — OK")
-    print("  zephyr.time.Duration — OK")
-    print("  zephyr.mutex.Mutex — OK")
-    print("  zephyr.condvar.Condvar — OK")
-    print("  zephyr.timer.Timer — OK")
-    print("  zephyr.queue.Queue — OK")
+    print("  zephyr.Semaphore    — OK")
+    print("  zephyr.Timer        — OK")
+    print("  zephyr.Queue        — OK")
+    print("  zephyr.Thread       — OK")
+    print("  zephyr.Channel      — OK")
+    print("  zephyr.sync.Mutex   — OK")
+    print("  zephyr.sync.Condvar — OK")
+    print("  zephyr.sync.SpinMutex — OK")
+    print("  zephyr.time.*       — OK")
