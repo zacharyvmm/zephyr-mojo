@@ -1,0 +1,17 @@
+[project]
+name = "zephyr-mojo"
+version = "0.1.0"
+description = "Safe, idiomatic Mojo bindings for the Zephyr RTOS kernel API"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mojo>=1.0.0b1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+]
+codegen = [
+    # Code generator has no extra deps (uses stdlib only)
+]
